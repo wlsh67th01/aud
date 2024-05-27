@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>武陵數資35界自編曲</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+  <style>
+    #app {
+      max-width: 70%;
+      margin: 0 auto;
+      text-align: center;
+    }
+    audio {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .slider {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <img src="./lyrics.png">
+    <audio ref="audio" :src="audioSource"></audio>
+    <input type="range" min="0" :max="duration" step="0.1" v-model="currentTime" @input="seek" class="slider">
+    <div class="controls">
+      <button @click="togglePlay">{{ isPlaying ? '&#10074;&#10074;' : '&#9658;' }}</button>
+      <div>
+        <label for="volume">&#128266;</label>
+        <input type="range" id="volume" min="0" max="1" step="0.01" v-model="volume" @input="updateVolume">
+      </div>
+      <span>{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        audioSource: './aud.MP3', // 替換為你的音頻文件路徑
+        isPlaying: false,
+        currentTime: 0,
+        duration: 0,
+        volume: 0.5
+      },
+      mounted() {
+        this.$refs.audio.volume = this.volume;
+        this.$refs.audio.addEventListener('timeupdate', this.updateTime);
+        this.$refs.audio.addEventListener('loadedmetadata', this.updateDuration);
+      },
+      methods: {
+        togglePlay() {
+          if (this.isPlaying) {
+            this.$refs.audio.pause();
+          } else {
+            this.$refs.audio.play();
+          }
+          this.isPlaying = !this.isPlaying;
+        },
+        updateTime() {
+          this.currentTime = this.$refs.audio.currentTime;
+        },
+        updateDuration() {
+          this.duration = this.$refs.audio.duration;
+        },
+        updateVolume() {
+          this.$refs.audio.volume = this.volume;
+        },
+        seek() {
+          this.$refs.audio.currentTime = this.currentTime;
+        },
+        formatTime(seconds) {
+          const minutes = Math.floor(seconds / 60);
+          const secs = Math.floor(seconds % 60);
+          return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
